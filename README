@@ -34,7 +34,8 @@ Example of DynamicContainer:
 		$dynamicContainer->setMaxCount(5); // maximum count of rows
 		$dynamicContainer->setDefaultCount(2); // default count of rows
 
-		$dynamicContainer->setFactory(function(FormContainer $container) { // set factory which add content to each of container
+		// set factory which add content to each of container
+		$dynamicContainer->setFactory(function(FormContainer $container) { 
 			$container->addText("text", "Input")
 				->addRule(Form::FILLED, "Input must be fillet !");
 			$container->addCheckbox("isok", "Is it ok?");
