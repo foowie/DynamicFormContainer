@@ -21,17 +21,25 @@ Example of DynamicContainer:
 
 	public function createComponentForm($name) {
 		$form = new AppForm($this, $name);
+
 		$dynamicContainer = $form->addDynamicContainer("dynamicContainer");
-		$dynamicContainer->setAddButton(true, "Give me new row !", "addButtonOfDynamicContainer"); // set button options not neccessery / have to be set befor form attached & factory set
-		$dynamicContainer->setDeleteButton(true, "I dont wana this !", "removeButtonOfDynamicContainer"); // set button options not neccessery / have to be set befor form attached & factory set
+
+		// set button options not neccessery / have to be set befor form attached & factory set
+		$dynamicContainer->setAddButton(true, "Give me new row !", "addButtonOfDynamicContainer");
+
+		// set button options not neccessery / have to be set befor form attached & factory set
+		$dynamicContainer->setDeleteButton(true, "I dont wana this !", "removeButtonOfDynamicContainer");
+
 		$dynamicContainer->setMinCount(1); // minimum count of rows
 		$dynamicContainer->setMaxCount(5); // maximum count of rows
 		$dynamicContainer->setDefaultCount(2); // default count of rows
+
 		$dynamicContainer->setFactory(function(FormContainer $container) { // set factory which add content to each of container
 			$container->addText("text", "Input")
 				->addRule(Form::FILLED, "Input must be fillet !");
 			$container->addCheckbox("isok", "Is it ok?");
 		});
+
 		return $form;
 	}
 
