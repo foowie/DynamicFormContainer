@@ -1,0 +1,60 @@
+Dynamic Form Container
+----------------------
+Nette addon that allows dynamically add/remove set of items in Form
+
+@author Daniel Robenek
+@license MIT
+
+class DynamicContainerCore - Base of functionality, allow to create dynamic container, add / remove row
+class DynamicContainer - Extending DynamicContainerCore, added options for auto-create add and remove buttons
+class FormMacros - Class created by Jan Marek, but upgraded to better functionality and implements DynamicContainer rendering
+
+Example of DynamicContainer:
+
+* Presenter *
+<?php
+	protected function startup() {
+		parent::startup();
+		Addons\Forms\FormMacros::register(); // register form macros
+		Addons\Forms\DynamicContainer::register(); // register $form->addDynamicContainer($name);
+	}
+
+	public function createComponentForm($name) {
+		$form = new AppForm($this, $name);
+		$dynamicContainer = $form->addDynamicContainer("dynamicContainer");
+		$dynamicContainer->setAddButton(true, "Give me new row !", "addButtonOfDynamicContainer"); // set button options not neccessery / have to be set befor form attached & factory set
+		$dynamicContainer->setDeleteButton(true, "I dont wana this !", "removeButtonOfDynamicContainer"); // set button options not neccessery / have to be set befor form attached & factory set
+		$dynamicContainer->setMinCount(1); // minimum count of rows
+		$dynamicContainer->setMaxCount(5); // maximum count of rows
+		$dynamicContainer->setDefaultCount(2); // default count of rows
+		$dynamicContainer->setFactory(function(FormContainer $container) { // set factory which add content to each of container
+			$container->addText("text", "Input")
+				->addRule(Form::FILLED, "Input must be fillet !");
+			$container->addCheckbox("isok", "Is it ok?");
+		});
+		return $form;
+	}
+
+	public function renderDefault() {
+		$this["form"]["dynamicContainer"]->beforeRender(); // needed :(
+	}
+?>
+
+* template (w/o formatting tags) *
+<?php
+	{form form}
+
+	{formErrors 'li style="color: red"', 'ul style="font-size: 1.5em"'}
+
+	{input addButtonOfDynamicContainer}
+
+	{dynamicContainer dynamicContainer}
+		{label text}{input text}
+		{label isok}{input isok}
+		{input removeButtonOfDynamicContainer}
+	{/dynamicContainer}
+
+	{/form}
+?>
+
+Enjoy :)

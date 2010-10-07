@@ -1,6 +1,15 @@
 <?php
 
+/**
+ * Nette addon that allows dynamically add/remove set of items in Form (FormContainer)
+ *
+ * @author Daniel Robenek
+ * @license MIT
+ */
+
 namespace Addons\Forms;
+
+// <editor-fold defaultstate="collapsed" desc="use">
 
 use Nette\IComponentContainer;
 use Nette\IComponent;
@@ -8,6 +17,8 @@ use Nette\Forms\FormContainer;
 use Nette\Application\Presenter;
 use \InvalidStateException;
 use \LogicException;
+
+// </editor-fold>
 
 class DynamicContainerCore extends FormContainer {
 
@@ -18,7 +29,7 @@ class DynamicContainerCore extends FormContainer {
 
 	/** Restriction for rows count */
 	protected $defaultRows = 1;
-	protected $minimumRows = 0;
+	protected $minimumRows = 2;
 	protected $maximumRows = 100;
 
 
@@ -50,6 +61,14 @@ class DynamicContainerCore extends FormContainer {
 	 */
 	public function getRowCount() {
 		return count($this->getComponents());
+	}
+
+	/**
+	 * Get all dynamic rows
+	 * @return Iterator of FormContainer
+	 */
+	public function getRows() {
+		return $this->getComponents();
 	}
 
 	/**
@@ -85,7 +104,7 @@ class DynamicContainerCore extends FormContainer {
 
 	/**
 	 * Set callback which content add items into container
-	 * @param Callback $callback
+	 * @param Callback $callback function($container, $dynamicContainer, $form)
 	 * @return $this
 	 */
 	public function setFactory($callback) {
@@ -102,7 +121,7 @@ class DynamicContainerCore extends FormContainer {
 	 * @return bool Was inserting successfull? (false = max rows reached)
 	 */
 	public function addRow() {
-		if(count($this->getComponents()) >= $this->maximumRows)
+		if($this->getRowCount() >= $this->maximumRows)
 			return false;
 		$this->createRow();
 		$this->fireOnChange();
@@ -114,6 +133,7 @@ class DynamicContainerCore extends FormContainer {
 	 * Fires onChange
 	 * @param int|string $name
 	 * @return bool true = ok false = minimum limit exceeded
+	 * @throws InvalidArgumentException
 	 */
 	public function removeRow($name) {
 		if(!isset($this[$name]))
@@ -149,7 +169,7 @@ class DynamicContainerCore extends FormContainer {
 	// <editor-fold defaultstate="collapsed" desc="other protected+ methods">
 
 	/**
-	 * Called when component is attached
+	 * Called when component is attached to monitored object
 	 * @param Presenter $obj
 	 */
 	protected function attached($obj)	{
@@ -161,8 +181,8 @@ class DynamicContainerCore extends FormContainer {
 	/**
 	 * Remove all subcontainers
 	 */
-	protected function clear() {
-		foreach($this->getComponents() as $name => $component)
+	protected function clearRows() {
+		foreach($this->getRows() as $name => $component)
 			unset($this[$name]);
 	}
 
@@ -171,7 +191,7 @@ class DynamicContainerCore extends FormContainer {
 	 */
 	protected function rebuild() {
 		if($this->getForm()->isSubmitted()) {
-			$this->clear();
+			$this->clearRows();
 			$containerPath = explode("-", $this->lookupPath("Nette\Forms\Form"));
 			$containerData = $this->getForm()->getHttpData();
 			foreach($containerPath as $step) { // goes through structure and extract neccesery data
@@ -191,7 +211,7 @@ class DynamicContainerCore extends FormContainer {
 	 * Create minimum count of rows if neccessery
 	 */
 	protected function fixMinRows() {
-		$count = count($this->getComponents());
+		$count = $this->getRowCount();
 		if($count < $this->minimumRows) {
 			for($i = $count; $i < $this->minimumRows; $i++)
 				$this->createRow();
@@ -202,7 +222,7 @@ class DynamicContainerCore extends FormContainer {
 	 * Create default count of rows if neccessery
 	 */
 	protected function fixDefaultRows() {
-		$count = count($this->getComponents());
+		$count = $this->getRowCount();
 		if($count < $this->defaultRows) {
 			for($i = $count; $i < $this->defaultRows; $i++)
 				$this->createRow();
@@ -212,17 +232,19 @@ class DynamicContainerCore extends FormContainer {
 	/**
 	 * Creates row of given name
 	 * @param string|int $name
+	 * @return FormContainer created container
 	 */
 	protected function createRow($name = null) {
-		$items = $this->getComponents();
+		$items = $this->getRows();
 		$itemCount = count($items);
 		if($name === null) {
-			$name = $itemCount == 0 ? "0" : (string)(1 + (int)end($items)->getName());
+			$name = $itemCount == 0 ? "0" : (string)(1 + (int)(end($items)->getName()));
 		}
 		$innerContainer = $this->addPrivateContainer($name);
 
 		call_user_func($this->factoryCallback, $innerContainer, $this, $this->getForm());
 
+		return $innerContainer;
 	}
 
 	/**
@@ -231,7 +253,7 @@ class DynamicContainerCore extends FormContainer {
 	 * @return FormContainer added contanier
 	 */
 	private function addPrivateContainer($name) {
-		$control = new FormContainer;
+		$control = new FormContainer();
 		$control->currentGroup = $this->currentGroup;
 		parent::addComponent($control, $name);
 		return $this[$name];
