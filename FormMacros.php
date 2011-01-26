@@ -26,6 +26,9 @@ class FormMacros extends \Nette\Object {
 
 	protected static $stack;
 
+	/** @var LatteMacros */
+	protected static $latteMacros = null;
+
 	public static $defaultOuterError = "div class='form-errors'";
 	public static $defaultInnerError = "p class='error'";
 
@@ -64,7 +67,8 @@ class FormMacros extends \Nette\Object {
 	// <editor-fold defaultstate="collapsed" desc="{formErrors}">
 
 	public static function macroFormErrors($content) {
-		$params = LatteMacros::formatArray($content);
+		$latteMacros = self::getLatteMacros();
+		$params = $latteMacros->formatArray($content);
 		return "Addons\Forms\FormMacros::formErrors($params)";
 	}
 	public static function formErrors($parameters) { // todo: refactor
@@ -186,6 +190,16 @@ class FormMacros extends \Nette\Object {
 	}
 
 	/**
+	 * Return instance of LatteMacros
+	 * @return LatteMacros
+	 */
+	public static function getLatteMacros() {
+		if(self::$latteMacros === null)
+			self::$latteMacros = new LatteMacros();
+		return self::$latteMacros;
+	}
+
+	/**
 	 * Return current rendered form
 	 * @return Form
 	 */
@@ -224,9 +238,10 @@ class FormMacros extends \Nette\Object {
 	}
 
 	protected static function fetchNameAndModifiers($content) {
-		$name = LatteMacros::fetchToken($content);
+		$latteMacros = self::getLatteMacros();
+		$name = $latteMacros->fetchToken($content);
 		$name = String::startsWith($name, '$') ? $name : "'$name'";
-		$modifiers = LatteMacros::formatArray($content);
+		$modifiers = $latteMacros->formatArray($content);
 		$modifiers = $modifiers ?: "array()";
 		return array($name, $modifiers);
 	}
