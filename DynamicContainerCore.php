@@ -199,7 +199,7 @@ class DynamicContainerCore extends FormContainer {
 					return $this->fixMinRows(); // empty
 				$containerData = $containerData[$step];
 			}
-			asort($containerData);
+			ksort($containerData);
 			foreach($containerData as $innerContainerName => $innerContainerValues)
 				$this->createRow($innerContainerName);
 		} else {
