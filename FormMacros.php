@@ -49,7 +49,7 @@ class FormMacros extends \Nette\Object {
 		return "Addons\Forms\FormMacros::formBegin($name, \$control, $modifiers)";
 	}
 	public static function formBegin($form, $control, $modifiers) {
-		$form = ($form instanceof Form) ?: $control[$form];
+		$form = ($form instanceof Form) ? $form : $control[$form];
 		self::$stack = array($form);
 		self::applyModifiers($form->getElementPrototype(), $modifiers);
 		$form->render("begin");
