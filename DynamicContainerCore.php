@@ -270,6 +270,23 @@ class DynamicContainerCore extends FormContainer {
 
 	// </editor-fold>
 
+
+	/**
+	 * Override: set values for this container while adding rows for it
+	 *   (needs https://github.com/nette/nette/pull/217 implemented in Nette)
+	 *
+	 * @param array $values
+	 * @param bool $erase
+	 * @return void
+	 */
+	public function setValues($values, $erase = FALSE) {
+		$this->clearRows();
+		foreach($values as $key => $sub) {
+			$this->createRow($key)->setValues($sub, $erase);
+		}
+	}
+
+
 	// <editor-fold defaultstate="collapsed" desc="register helpers">
 
 	public static function FormContainer_addDynamicContainerCore(FormContainer $_this, $name = null, $factoryCallback = null) {
