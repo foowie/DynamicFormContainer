@@ -173,7 +173,11 @@ class FormMacros extends \Nette\Object {
 
 	public static function macroBeginDynamicContainer($content) {
 		list($name) = self::fetchNameAndModifiers($content);
-		return '$dynamicContainers = Addons\Forms\FormMacros::getControl('.$name.')->getComponents(); Addons\Forms\FormMacros::beginContainer('.$name.'); foreach($dynamicContainers as $dynamicContainerName => $dynamicContainer): Addons\Forms\FormMacros::beginContainer($dynamicContainerName);';
+		return
+			'$dynamicContainers = Addons\Forms\FormMacros::getControl('.$name.')->getComponents();
+			Addons\Forms\FormMacros::beginContainer('.$name.');
+			foreach($dynamicContainers as $dynamicContainerName => $dynamicContainer):
+				Addons\Forms\FormMacros::beginContainer($dynamicContainerName);';
 	}
 	public static function macroEndDynamicContainer($content) {
 		return "Addons\Forms\FormMacros::endContainer(); endforeach; Addons\Forms\FormMacros::endContainer();";
