@@ -151,6 +151,8 @@ class DynamicContainer extends DynamicContainerCore {
 			if ($this->useAjax)
 				$button->getControlPrototype()->class($this->ajaxClass);
 		}
+
+		return $innerContainer;
 	}
 
 	/**

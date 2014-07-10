@@ -129,6 +129,17 @@ class FormMacros extends \Nette\Object {
 		echo $input;
 	}
 
+	public static function macroPair($content) {
+		list($name, $modifiers) = self::fetchNameAndModifiers($content);
+		return "Addons\Forms\FormMacros::pair($name, $modifiers)";
+	}
+	public static function pair($name, $modifiers) {
+		$control = self::getControl($name);
+		echo self::getForm()->getRenderer()->renderPair($control);
+	}
+
+
+
 	// </editor-fold>
 
 	// <editor-fold defaultstate="collapsed" desc="{label}">
@@ -162,7 +173,11 @@ class FormMacros extends \Nette\Object {
 
 	public static function macroBeginDynamicContainer($content) {
 		list($name) = self::fetchNameAndModifiers($content);
-		return '$dynamicContainers = Addons\Forms\FormMacros::getControl('.$name.')->getComponents(); Addons\Forms\FormMacros::beginContainer('.$name.'); foreach($dynamicContainers as $dynamicContainerName => $dynamicContainer): Addons\Forms\FormMacros::beginContainer($dynamicContainerName);';
+		return
+			'$dynamicContainers = Addons\Forms\FormMacros::getControl('.$name.')->getComponents();
+			Addons\Forms\FormMacros::beginContainer('.$name.');
+			foreach($dynamicContainers as $dynamicContainerName => $dynamicContainer):
+				Addons\Forms\FormMacros::beginContainer($dynamicContainerName);';
 	}
 	public static function macroEndDynamicContainer($content) {
 		return "Addons\Forms\FormMacros::endContainer(); endforeach; Addons\Forms\FormMacros::endContainer();";
@@ -178,6 +193,7 @@ class FormMacros extends \Nette\Object {
 
 		LatteMacros::$defaultMacros["formErrors"] = '<?php %Addons\Forms\FormMacros::macroFormErrors% ?>';
 
+		LatteMacros::$defaultMacros["pair"] = '<?php %Addons\Forms\FormMacros::macroPair% ?>';
 		LatteMacros::$defaultMacros["input"] = '<?php %Addons\Forms\FormMacros::macroInput% ?>';
 		LatteMacros::$defaultMacros["label"] = '<?php %Addons\Forms\FormMacros::macroLabel% ?>';
 		LatteMacros::$defaultMacros["inputValue"] = '<?php %Addons\Forms\FormMacros::macroInputValue% ?>';
